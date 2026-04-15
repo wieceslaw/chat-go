@@ -6,16 +6,21 @@ import (
 	"net/http"
 
 	"github.com/wieceslaw/chat-go/cmd/server/auth"
+	"github.com/wieceslaw/chat-go/cmd/server/hello"
 )
 
 func main() {
 	ctx := context.Background()
 	mux := http.NewServeMux()
 
-	repository := auth.MockUserRepository()
+	repository := auth.NewUserRepository("postgresql://myuser:mypassword@localhost/mydatabase?sslmode=disable")
+	defer repository.Close()
 	service, _ := auth.NewUserService(ctx, repository, auth.MockJwtProvider())
+	middleware := auth.NewAuthMiddleware(service)
 	handler := auth.NewAuthHanlder(service)
 	handler.Register(mux)
+
+	hello.Register(mux, middleware.Wrap)
 
 	http.ListenAndServe(":8080", mux)
 
