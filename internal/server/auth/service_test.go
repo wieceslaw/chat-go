@@ -1,0 +1,48 @@
+package auth
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestAdd(t *testing.T) {
+	repository := mockUserRepository{
+		users: make(map[string]User),
+	}
+	us, err := NewUserService(
+		context.Background(),
+		&repository,
+		&mockJwtProvider{[]byte("longsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecretlongsecret")},
+	)
+	assert.Nil(t, err)
+
+	name := "testName"
+	password := "testPassword"
+	err = us.Register(context.Background(), &RegisterUser{
+		Name:     name,
+		Password: password,
+	})
+	assert.Nil(t, err)
+
+	user, err := repository.GetUser(context.Background(), name)
+	assert.NotNil(t, user)
+	assert.Nil(t, err)
+	assert.Equal(t, user.Name, name)
+
+	token, err := us.Login(context.Background(), &LoginData{
+		Username: name,
+		Password: password,
+	})
+	assert.NotNil(t, token)
+	assert.Nil(t, err)
+
+	user, err = us.ValidateToken(context.Background(), *token)
+	assert.Nil(t, err)
+	assert.NotNil(t, user)
+	assert.Equal(t, user.Name, name)
+
+	user, err = us.ValidateToken(context.Background(), "123")
+	assert.NotNil(t, err)
+}

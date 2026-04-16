@@ -1,0 +1,15 @@
+services:
+  db: # psql -h localhost -p 5432 -U myuser -d mydatabase
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/docker
+
+volumes:
+  postgres_data:
