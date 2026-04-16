@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/wieceslaw/chat-go/cmd/server/auth"
-	"github.com/wieceslaw/chat-go/cmd/server/hello"
+	"github.com/wieceslaw/chat-go/internal/server/auth"
+	"github.com/wieceslaw/chat-go/internal/server/hello"
 )
 
 func main() {
