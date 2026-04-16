@@ -1,29 +1,32 @@
 package hello
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/wieceslaw/chat-go/internal/server/auth"
 )
 
-func Register(mux *http.ServeMux, middleware func(hanlder func(w http.ResponseWriter, r *http.Request)) http.Handler) {
-	mux.Handle("GET /api/v1/hello", middleware(hello))
+type HelloHandler struct {
 }
 
-type HelloMessage struct {
+func NewHelloHandler() *HelloHandler {
+	return &HelloHandler{}
+}
+
+func (h *HelloHandler) RegisterRoutes(rg *gin.RouterGroup) {
+	rg.GET("/", h.hello)
+}
+
+type helloResponseDto struct {
 	Message string
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	user, err := auth.GetUser(r.Context())
+func (h *HelloHandler) hello(c *gin.Context) {
+	user, err := auth.GetUser(c)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	response := HelloMessage{Message: "Hello, " + user.Name + "!"}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	c.JSON(http.StatusOK, helloResponseDto{Message: "Hello, " + user.Name + "!"})
 }

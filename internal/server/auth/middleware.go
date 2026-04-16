@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"context"
 	"errors"
-	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 const userKey = "user"
@@ -19,27 +19,35 @@ func NewAuthMiddleware(service UserService) *AuthMiddleware {
 	}
 }
 
-func GetUser(ctx context.Context) (*User, error) {
-	user, ok := ctx.Value(userKey).(*User)
+func GetUser(c *gin.Context) (*User, error) {
+	user, ok := c.Get(userKey)
+	println(user)
 	if ok {
-		return user, nil
+		return user.(*User), nil
 	}
 	return nil, errors.New("No user in context")
 }
 
-func (am *AuthMiddleware) Wrap(hanlder func(w http.ResponseWriter, r *http.Request)) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-
-		user, err := am.Service.ValidateToken(r.Context(), AuthToken(token))
-
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+func (am *AuthMiddleware) AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Authorization header required",
+			})
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userKey, user)
-		hanlder(w, r.WithContext(ctx))
-	})
+		user, err := am.Service.ValidateToken(c.Request.Context(), AuthToken(token))
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid authorization format",
+			})
+			return
+		}
+
+		c.Set(userKey, user)
+		c.Next()
+	}
 }

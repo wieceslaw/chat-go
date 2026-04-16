@@ -1,4 +1,5 @@
-- add migrations
+- add indexes
+- add main app and shutdown
 - add configuration
 - add unit + integration tests
 - add openapi spec

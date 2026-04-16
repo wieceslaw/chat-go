@@ -3,26 +3,33 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/wieceslaw/chat-go/internal/server/auth"
 	"github.com/wieceslaw/chat-go/internal/server/hello"
 )
 
 func main() {
 	ctx := context.Background()
-	mux := http.NewServeMux()
+
+	r := gin.Default()
 
 	repository := auth.NewUserRepository("postgresql://myuser:mypassword@localhost/mydatabase?sslmode=disable")
 	defer repository.Close()
 	service, _ := auth.NewUserService(ctx, repository, auth.MockJwtProvider())
-	middleware := auth.NewAuthMiddleware(service)
-	handler := auth.NewAuthHanlder(service)
-	handler.Register(mux)
 
-	hello.Register(mux, middleware.Wrap)
+	authHandler := auth.NewAuthHanlder(service)
+	authHandler.RegisterRoutes(r.Group(""))
 
-	http.ListenAndServe(":8080", mux)
+	authMiddleware := auth.NewAuthMiddleware(service)
+
+	api := r.Group("/api/v1")
+	api.Use(authMiddleware.AuthRequired())
+	{
+		helloHandler := hello.NewHelloHandler()
+		helloHandler.RegisterRoutes(api.Group("/hello"))
+	}
 
 	fmt.Println("Server started on port: 8080")
+	r.Run(":8080")
 }
