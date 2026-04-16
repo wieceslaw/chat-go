@@ -1,6 +1,0 @@
-CREATE TABLE chats (
-    id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    owner_id INT REFERENCES users(id),
-    created TIMESTAMP
-)
