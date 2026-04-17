@@ -1,0 +1,14 @@
+# Exclude everything
+*
+
+# But include these (whitelist)
+!go.mod
+!go.sum
+!cmd/
+!internal/
+!pkg/
+!config/
+
+# Still exclude tests
+!**/*.go
+*_test.go

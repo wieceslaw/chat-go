@@ -1,4 +1,4 @@
-# Run
+# Run (development)
 
 ```sh
 # run db & app
