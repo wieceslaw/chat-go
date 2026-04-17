@@ -30,7 +30,7 @@ func New(ctx context.Context, configFile string) (*Server, error) {
 	gin.SetMode(cfg.Server.Mode)
 
 	// Connect to db
-	db, err := getDb(ctx, cfg)
+	db, err := getDb(ctx, &cfg.Database)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to connect to db: %v", err)
 	}
@@ -123,16 +123,22 @@ func setupRoutes(ctx context.Context, db *sql.DB, r *gin.Engine) error {
 	return nil
 }
 
-func getDb(ctx context.Context, cfg *config.Config) (*sql.DB, error) {
-	// TODO:
-	db, err := sql.Open("postgres", "postgresql://myuser:mypassword@localhost/mydatabase?sslmode=disable")
+func getDb(ctx context.Context, cfg *config.DatabaseConfig) (*sql.DB, error) {
+	db, err := sql.Open(cfg.Driver, cfg.DSN())
 	if err != nil {
 		return nil, fmt.Errorf("Failed to open db driver %v", err)
 	}
+
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 
 	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to ping db %v", err)
 	}
+
+	log.Println("Database connected successfully")
+
 	return db, nil
 }

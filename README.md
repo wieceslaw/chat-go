@@ -5,6 +5,7 @@
 - add openapi spec
 
 # infra
+- dockerfile improvement
 - add linter + formatter (https://freshman.tech/linting-golang/)
 - add ci
 - add docker deployment

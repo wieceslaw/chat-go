@@ -19,11 +19,11 @@ server:
 
 database:
   driver: "postgres"
-  host: "localhost"
-  port: 5432
-  username: "app_user"
-  password: "${DB_PASSWORD}"  # Use env var
-  database: "app_db"
+  host: "${DATABASE_HOST}"
+  port: "${DATABASE_PORT}"
+  username: "${DATABASE_USERNAME}"
+  password: "${DATABASE_PASSOWRD}"
+  database: "${DATABASE_DATABASE}"
   ssl_mode: "disable"
   max_open_conns: 25
   max_idle_conns: 10

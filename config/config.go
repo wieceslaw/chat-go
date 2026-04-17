@@ -53,6 +53,16 @@ type DatabaseConfig struct {
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
 }
 
+func (c *DatabaseConfig) DSN() string {
+	switch c.Driver {
+	case "postgres":
+		return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			c.Host, c.Port, c.Username, c.Password, c.Database, c.SSLMode)
+	default:
+		return ""
+	}
+}
+
 type AuthConfig struct {
 	JWTSecret     string        `mapstructure:"jwt_secret"`
 	JWTExpiry     time.Duration `mapstructure:"jwt_expiry"`

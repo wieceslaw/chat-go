@@ -10,6 +10,25 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/18/docker
+    networks:
+      - backend
+
+  app:
+    image: chatapp:latest
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_DATABASE: mydatabase
+      DATABASE_USERNAME: myuser
+      DATABASE_PASSWORD: mypassword
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
 
 volumes:
   postgres_data:
+
+networks:
+  backend:
+    driver: bridge
