@@ -1,13 +1,11 @@
-- add indexes
-- add main app and shutdown
-- add configuration
-- add unit + integration tests
-- add openapi spec
+# Run
 
-# infra
-- dockerfile improvement
-- add linter + formatter (https://freshman.tech/linting-golang/)
-- add ci
-- add docker deployment
-- add open telemetry (logging, tracing, metrics)
-- add k8n deployment
+```sh
+# run db & app
+docker-compose up -d
+```
+
+```sh
+# clean everything
+docker-compose down -v
+```
