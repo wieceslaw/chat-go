@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 
 	_ "github.com/lib/pq" // To register the driver.
 )
@@ -17,31 +16,16 @@ var (
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *NewUser) error
 	GetUser(ctx context.Context, username string) (*User, error)
-	Close() error
 }
 
 type userRepositoryImpl struct {
 	DB *sql.DB
 }
 
-func NewUserRepository(connString string) UserRepository {
-	db, err := sql.Open("postgres", connString)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepositoryImpl{
 		DB: db,
 	}
-}
-
-func (r *userRepositoryImpl) Close() error {
-	return r.DB.Close()
 }
 
 func (r *userRepositoryImpl) CreateUser(ctx context.Context, user *NewUser) error {

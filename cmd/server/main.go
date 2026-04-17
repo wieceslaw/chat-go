@@ -2,34 +2,50 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/wieceslaw/chat-go/internal/server/auth"
-	"github.com/wieceslaw/chat-go/internal/server/hello"
+	"github.com/wieceslaw/chat-go/internal/server"
 )
 
 func main() {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	r := gin.Default()
-
-	repository := auth.NewUserRepository("postgresql://myuser:mypassword@localhost/mydatabase?sslmode=disable")
-	defer repository.Close()
-	service, _ := auth.NewUserService(ctx, repository, auth.MockJwtProvider())
-
-	authHandler := auth.NewAuthHanlder(service)
-	authHandler.RegisterRoutes(r.Group(""))
-
-	authMiddleware := auth.NewAuthMiddleware(service)
-
-	api := r.Group("/api/v1")
-	api.Use(authMiddleware.AuthRequired())
-	{
-		helloHandler := hello.NewHelloHandler()
-		helloHandler.RegisterRoutes(api.Group("/hello"))
+	srv, err := server.New(ctx, "config/config.dev.yaml")
+	if err != nil {
+		log.Fatalf("Failed to create server: %v", err)
 	}
 
-	fmt.Println("Server started on port: 8080")
-	r.Run(":8080")
+	go func() {
+		log.Printf("Server starting on %s", srv)
+		if err := srv.Run(ctx); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
+
+	gracefulShutdown(srv, cancel)
+}
+
+func gracefulShutdown(srv *server.Server, cancel context.CancelFunc) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Println("Shutting down server...")
+
+	cancel()
+
+	ctx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server failed to shutdown gracefully: %v", err)
+	}
+
+	log.Println("Server exited properly")
 }
