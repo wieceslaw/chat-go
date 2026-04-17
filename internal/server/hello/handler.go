@@ -28,5 +28,6 @@ func (h *HelloHandler) hello(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, helloResponseDto{Message: "Hello, " + user.Name + "!"})
+	message := "Hello, " + user.Name + "!"
+	c.JSON(http.StatusOK, helloResponseDto{Message: message})
 }

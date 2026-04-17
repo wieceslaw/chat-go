@@ -1,6 +1,7 @@
+- add environments
 - add indexes
-- add main app and shutdown
-- add configuration
+- refactor app file
+- add structured logging
 - add unit + integration tests
 - add openapi spec
 
@@ -8,6 +9,5 @@
 - dockerfile improvement
 - add linter + formatter (https://freshman.tech/linting-golang/)
 - add ci
-- add docker deployment
 - add open telemetry (logging, tracing, metrics)
 - add k8n deployment

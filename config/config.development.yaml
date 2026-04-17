@@ -1,3 +1,5 @@
+environment: development
+
 server:
   mode: "debug"
   port: "8080"
@@ -12,18 +14,18 @@ server:
   enable_recovery: true
   max_multipart_memory: 33554432  # 32MB
   body_size_limit: 10485760       # 10MB
-  enable_metrics: true
-  enable_cors: false
-  rate_limit: 100
-  rate_limit_burst: 200
+  # enable_metrics: true
+  # enable_cors: false
+  # rate_limit: 100
+  # rate_limit_burst: 200
 
 database:
   driver: "postgres"
-  host: "${DATABASE_HOST}"
-  port: "${DATABASE_PORT}"
-  username: "${DATABASE_USERNAME}"
-  password: "${DATABASE_PASSOWRD}"
-  database: "${DATABASE_DATABASE}"
+  host: "localhost"
+  port: "5432"
+  username: "myuser"
+  password: "mypassword"
+  database: "mydatabase"
   ssl_mode: "disable"
   max_open_conns: 25
   max_idle_conns: 10
@@ -35,7 +37,7 @@ auth:
   refresh_expiry: 168h  # 7 days
   bcrypt_cost: 12
 
-logging:
-  level: "info"
-  format: "json"
-  output_path: "stdout"
+# logging:
+#   level: "info"
+#   format: "json"
+#   output_path: "stdout"

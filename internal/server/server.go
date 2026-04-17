@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/wieceslaw/chat-go/config"
+	"github.com/wieceslaw/chat-go/internal/environment"
 	"github.com/wieceslaw/chat-go/internal/server/auth"
 	"github.com/wieceslaw/chat-go/internal/server/hello"
 )
@@ -104,7 +105,7 @@ func setupRouter(ctx context.Context, db *sql.DB, cfg *config.Config) *gin.Engin
 	return router
 }
 
-func setupRoutes(ctx context.Context, db *sql.DB, r *gin.Engine) error {
+func setupRoutes(ctx context.Context, db *sql.DB, r *gin.Engine) {
 	repository := auth.NewUserRepository(db)
 	service, _ := auth.NewUserService(ctx, repository, auth.MockJwtProvider())
 
@@ -116,11 +117,11 @@ func setupRoutes(ctx context.Context, db *sql.DB, r *gin.Engine) error {
 	api := r.Group("/api/v1")
 	api.Use(authMiddleware.AuthRequired())
 	{
-		helloHandler := hello.NewHelloHandler()
-		helloHandler.RegisterRoutes(api.Group("/hello"))
+		if environment.Get() == environment.DevelopmentEnv {
+			helloHandler := hello.NewHelloHandler()
+			helloHandler.RegisterRoutes(api.Group("/hello"))
+		}
 	}
-
-	return nil
 }
 
 func getDb(ctx context.Context, cfg *config.DatabaseConfig) (*sql.DB, error) {

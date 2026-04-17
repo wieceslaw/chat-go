@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,10 +15,24 @@ import (
 )
 
 func main() {
+	configFile := flag.String("config", "config/config.development.yaml", "Path to configuration file (required)")
+
+	flag.Parse()
+
+	// Check if config file is provided
+	if *configFile == "" {
+		fmt.Println("Error: config file parameter is required")
+		fmt.Println("Usage: program -config <filename>")
+		flag.PrintDefaults()
+		log.Fatal("Error: config file parameter is required")
+	}
+
+	fmt.Printf("Using config file: %s\n", *configFile)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	srv, err := server.New(ctx, "config/config.dev.yaml")
+	srv, err := server.New(ctx, *configFile)
 	if err != nil {
 		log.Fatalf("Failed to create server: %v", err)
 	}

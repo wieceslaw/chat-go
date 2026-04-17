@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"github.com/wieceslaw/chat-go/internal/environment"
 )
 
 type Config struct {
+	Env      string         `mapstructure:"environment"`
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
 	Auth     AuthConfig     `mapstructure:"auth"`
@@ -76,25 +78,6 @@ type LoggingConfig struct {
 	OutputPath string `mapstructure:"output_path"`
 }
 
-// func DefaultServerConfig() *ServerConfig {
-// 	return &ServerConfig{
-// 		Mode:               gin.DebugMode,
-// 		Port:               "8080",
-// 		Host:               "0.0.0.0",
-// 		ReadTimeout:        30 * time.Second,
-// 		WriteTimeout:       30 * time.Second,
-// 		TrustedProxies:     []string{"127.0.0.1", "10.0.0.0/8"},
-// 		EnableLogger:       true,
-// 		EnableRecovery:     true,
-// 		MaxMultipartMemory: 32 << 20, // 32 MB
-// 		BodySizeLimit:      10 << 20, // 10 MB
-// 		EnableMetrics:      false,
-// 		EnableCORS:         false,
-// 		RateLimit:          100,
-// 		RateLimitBurst:     200,
-// 	}
-// }
-
 func (c *Config) validate() error {
 	if c.Server.Port == "" {
 		return fmt.Errorf("server port is required")
@@ -124,6 +107,8 @@ func Load(configPath string) (*Config, error) {
 	if err := cfg.validate(); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
+
+	environment.MustInit(cfg.Env)
 
 	return &cfg, nil
 }

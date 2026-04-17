@@ -27,4 +27,4 @@ COPY --from=builder /app/config config/
 
 EXPOSE 8080
 
-CMD ["./server"]
+CMD ["./server", "--config", "config/config.development.yaml"]
